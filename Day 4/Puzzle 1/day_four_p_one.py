@@ -1,45 +1,65 @@
-def get_banks(filename):
+import copy
+
+
+def get_paper_rolls(filename):
     with open(filename, 'r') as file:
         lines = file.readlines()
-        banks = []
+        paper_grid = []
         for line in lines:
             line = line.strip()
-            banks.append(line)
-    return banks
+            paper_grid.append(line)
+    final = []
+    for row in paper_grid:
+        row_list = list(row)
+        final.append(row_list)
+
+    return final
 
 
-def get_total_joltages(banks):
-    total_joltage = 0
-    for bank in banks:
-        total_joltage += get_bank_joltage(bank)
-        # print(get_bank_joltage(bank))
-    return total_joltage
+def print_grid(paper_rolls_grid):
+    for row in paper_rolls_grid:
+        print(row)
 
 
-def get_bank_joltage(bank_str):
-    bank_length = len(bank_str)
-    max_joltage_tens = -1
-    tens_index = 0
-    for bat in range(bank_length - 1):
-        if int(bank_str[bat]) > max_joltage_tens:
-            max_joltage_tens = int(bank_str[bat])
-            # print(max_joltage_tens)
-            tens_index = bat
-            # print(tens_index)
-    max_joltage_ones = -1
-    # ones_index = tens_index + 1
-    for bat in range(bank_length - 1, tens_index, -1):
-        if int(bank_str[bat]) > max_joltage_ones:
-            max_joltage_ones = int(bank_str[bat])
-            # ones_index = bat
+def valid_paper_rolls(grid_o):
+    grid = copy.deepcopy(grid_o)
+    row_len = len(grid)
+    column_len = len(grid[0])
+    # print(row_len, column_len)
+    new_grid = copy.deepcopy(grid)
+    for row in range(row_len):
+        for col in range(column_len):
+            # print(grid[row][col])
+            if grid[row][col] == '.':
+                continue
+            if grid[row][col] == '@':
+                roll_count = -1
+                for r in range(-1, 2):
+                    for c in range(-1, 2):
+                        if 0 <= row + r < row_len and 0 <= col + c < column_len:
+                            if grid[row + r][col + c] == '@':
+                                roll_count += 1
+                if roll_count < 4:
+                    new_grid[row][col] = 'x'
+    return new_grid
 
-    return max_joltage_tens * 10 + max_joltage_ones
+
+def count_x(paper_rolls_grid):
+    row_len = len(paper_rolls_grid)
+    column_len = len(paper_rolls_grid[0])
+    x_counter = 0
+    for row in range(row_len):
+        for col in range(column_len):
+            if paper_rolls_grid[row][col] == 'x':
+                x_counter += 1
+    return x_counter
 
 
 def main():
-    print(get_total_joltages(get_banks('banks.txt')))
-    # print(get_bank_joltage('987654321111111'))
+    paper_rolls = get_paper_rolls('paper_rolls.txt')
+    # print_grid(valid_paper_rolls(paper_rolls))
+    print(count_x(valid_paper_rolls(paper_rolls)))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
