@@ -51,13 +51,13 @@ def remove_paper_rolls(grid_o):
 
 
 def get_total_removed(paper_rolls_grid_tup):
-    paper_rolls_grid = paper_rolls_grid_tup[0]
     total_removed = paper_rolls_grid_tup[1]
     grid_tup_copy = copy.deepcopy(paper_rolls_grid_tup)
     # print_grid(paper_rolls_grid_tup)
     while True:
         removed = remove_paper_rolls(grid_tup_copy)
         total_removed += removed[1]
+        paper_rolls_grid = removed[0]
         grid_tup_copy = removed
         if removed[1] == 0:
             print("total: ", total_removed)
@@ -65,12 +65,27 @@ def get_total_removed(paper_rolls_grid_tup):
     return paper_rolls_grid, total_removed
 
 
+def print_neat(paper_rolls_grid):
+    grid = paper_rolls_grid[0]
+    # print_grid(paper_rolls_grid)
+    new_grid = []
+    for row in range(len(grid)):
+        string = ''
+        for col in range(len(grid[0])):
+            string += str(grid[row][col])
+        new_grid.append(string)
+
+    return new_grid, 0
+
+
 def main():
     paper_rolls = get_paper_rolls('../Puzzle 1/paper_rolls.txt')
     # paper_rolls = get_paper_rolls('../Puzzle 1/sample.txt')
 
-    print(get_total_removed(paper_rolls)[1])
-
+    # print(get_total_removed(paper_rolls)[1])
+    final_grid = get_total_removed(paper_rolls)
+    # print_neat(final_grid)
+    print_grid(print_neat(final_grid))
 
 
 if __name__ == '__main__':
