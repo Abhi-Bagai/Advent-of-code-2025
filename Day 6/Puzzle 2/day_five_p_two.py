@@ -1,63 +1,128 @@
-def get_ingredients(filename):
+# import numpy as np
+
+def get_input(filename):
     with open(filename, 'r') as file:
         lines = file.readlines()
-        ingredient_id_ranges = []
-        available_ingredient_ids = []
-        for line in lines:
-            if '-' in line:
-                line = line.strip().split('-')
-                tuple_id_range = (int(line[0]), int(line[1]))
-                ingredient_id_ranges.append(tuple_id_range)
-            elif line.strip() == '':
-                continue
-            else:
-                line = line.strip()
-                available_ingredient_ids.append(int(line))
-    return ingredient_id_ranges, available_ingredient_ids
+        input_values = []
+        operators = lines[-1]
+        max_line_length = max([len(line) for line in lines])
+        max_line_length = max_line_length - 1
+        for line in lines[:-1]:
+            line = line[:-1]
+            if len(line) < max_line_length:
+                add = max_line_length - len(line)
+                line = line + ' ' * add
+            input_values.append(line)
+
+        if len(operators) < max_line_length:
+            add = max_line_length - len(operators)
+            operators = operators + ' ' * add
+
+    return input_values, operators
 
 
-def merge_overlapping_ranges(ingredient_id_ranges):
-    """
-    Merge overlapping ranges efficiently.
-    Algorithm: Sort by start, then merge overlapping/adjacent ranges.
-    """
-    if not ingredient_id_ranges:
-        return []
-
-    # Sort ranges by start value
-    sorted_ranges = sorted(ingredient_id_ranges, key=lambda x: x[0])
-
-    merged = [sorted_ranges[0]]
-
-    for current_start, current_end in sorted_ranges[1:]:
-        last_start, last_end = merged[-1]
-
-        # If current range overlaps or is adjacent to the last merged range
-        if current_start <= last_end + 1:  # +1 for adjacent ranges (e.g., 5-6 and 7-8 merge to 5-8)
-            # Merge: extend the end if current range extends further
-            merged[-1] = (last_start, max(last_end, current_end))
-        else:
-            # No overlap, add as new range
-            merged.append((current_start, current_end))
-
-    return merged
+def clean_up_num(lines):
+    input_values = []
+    for line in lines:
+        new_line = [i for i in line]
+        input_values.append(new_line)
+    return input_values
 
 
-def validate_freshness(ing_ranges):
-    count = 0
-    for ing_id_ran in ing_ranges:
-        count += ing_id_ran[1] - ing_id_ran[0] + 1
-    return count
+def clean_up_op(line):
+    operators = []
+    for i in line:
+        if i != ' ':
+            operators.append(i)
+
+    return operators
+
+
+def transpose_input(input_values):
+    transposed = [
+        [row[i] for row in input_values]
+        for i in range(len(input_values[0]))
+    ]
+    return transposed
+
+
+def transform_input(input_values):
+    transposed = transpose_input(input_values)
+    transformed = []
+    for i in range(len(transposed)):
+        if transposed[i] != [' ', ' ', ' ']:  # remove [' ', ' ', ' ']
+            transformed.append(transposed[i])
+    for i_list in transformed:
+        # print(i_list)
+        for j_str in range(len(i_list)):
+            if i_list[j_str] == ' ':
+                i_list[j_str] = '0'
+        # print(i_list)
+    remove_zeros = []
+    for seq in transformed:
+        seq_str = ''
+        for i in range(len(seq)):
+            seq[i] = int(seq[i])
+            if seq[i] > 0:
+                seq_str += str(seq[i])
+        remove_zeros.append(seq_str.strip())
+    # print(remove_zeros)
+    input_ints = remove_zeros
+    # input_ints = [int(i) for i in remove_zeros if i != '']
+    # print('start ', input_ints)
+
+    input_ints_seg = []
+    while len(input_ints) > 0:
+        segment = []
+        while len(input_ints) > 0 and input_ints[0] != '':
+            segment.append(input_ints[0])
+            input_ints.pop(0)
+
+        input_ints_seg.append(segment)
+        if len(input_ints) > 0:
+            input_ints.pop(0)
+
+    # print('this', input_ints_seg)
+
+    return input_ints_seg
+
+
+def calculate_total(inputs, operators):
+    total = 0
+    for item in zip(inputs, operators):
+        if item[1] == '+':
+            total += add_row(item[0])
+        elif item[1] == '*':
+            total += multiply_row(item[0])
+    return total
+
+
+def add_row(row):
+    row = [int(num) for num in row]
+    # print('row', row)
+    total = 0
+    for num in row:
+        total += num
+    return total
+
+
+def multiply_row(row):
+    row = [int(num) for num in row]
+    # print('row', row)
+    total = 1
+    for num in row:
+        total *= num
+    return total
 
 
 def main():
-    ingredients = get_ingredients('ingredient_db.txt')
-    ingredient_id_ranges, available_ingredient_ids = ingredients[0], ingredients[1]
-    # print(ingredient_id_ranges)
-    # print(available_ingredient_ids)
-    optimized = merge_overlapping_ranges(ingredient_id_ranges)
-    # print(optimized)
-    print(validate_freshness(optimized))
+    input_values, operators = get_input('input.txt')
+    input_values = clean_up_num(input_values)
+    input_values = transform_input(input_values)
+
+    operators = clean_up_op(operators)
+
+    print(calculate_total(input_values, operators))
 
 
 if __name__ == '__main__':
