@@ -47,7 +47,7 @@ def calculate_shortest_distances(coordinates):
 
     distances_added = 2
     print(f'distances_added : {distances_added}')
-    while len(distances) > 0 and distances_added < 10:
+    while len(distances) > 0:
         next_point = distances[0]
         results.sort(key=lambda x: len(x), reverse=True)
         total = None
@@ -118,7 +118,7 @@ def get_total(circuits):
 
 
 def main():
-    input_values = get_input('./input.txt')
+    input_values = get_input('./input2.txt')
     listed_coords = [coords for coords in input_values]
     # print(listed_coords)
     coords_dict = {junc: coord for junc, coord in listed_coords}
