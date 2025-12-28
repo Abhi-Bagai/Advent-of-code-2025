@@ -90,23 +90,36 @@ def add_green_tiles(green_coordinates, size, minimum):
     return grid
 
 
-def fill_green_coords(grid, green_coordinates, size, minimum):
-    rows_add = []
-    for row in range(minimum, size):
-        if grid[row].count('X') >= 2:
-            rows_add.append(row)
-    # print(rows_add)
-    while len(rows_add) > 0:
-        rx = rows_add.pop(0)
-        points = []
-        for x, y in green_coordinates:
-            if y == rx:
-                points.append((x, y))
-        points.sort(key=lambda point: point[0])
-        for point in range(points[0][0], points[-1][0]):
-            green_coordinates.append((point, rx))
-    green_coordinates = list(set(green_coordinates))
-    return green_coordinates
+def fill_coords(coords):
+    border_coords = copy.deepcopy(coords)
+    first_c= coords[0][1]
+    last_c = coords[-1][1]
+    print(first_c, last_c)
+    ranges = []
+    current_coord = border_coords[0]
+    while len(border_coords) > 0:
+        init_y = current_coord[1]
+        current_row = []
+        while current_coord[1] == init_y:
+            begin_r = current_coord[0]
+            if len(current_row) == 0:
+                current_row.append((begin_r, init_y))
+                border_coords.pop(0)
+
+
+        ranges.append(current_row)
+    return ranges
+
+
+
+
+
+
+
+
+
+
+
 
 
 def grid_red_green(green, red, size, minimum):
@@ -119,6 +132,19 @@ def grid_red_green(green, red, size, minimum):
                 point = 'X'
             elif (x, y) in red:
                 point = '#'
+            row += point
+        grid.append(row)
+    return grid
+
+
+def grid_border(border_coordinates, size, minimum):
+    grid = []
+    for y in range(minimum, size):
+        row = []
+        for x in range(minimum, size):
+            point = '.'
+            if (x, y) in border_coordinates:
+                point = '*'
             row += point
         grid.append(row)
     return grid
@@ -168,22 +194,29 @@ def get_max_area(red_coords, all_coords):
 def main():
     red_coordinates, size, minimum = get_input('./input2.txt')
     print(red_coordinates, '\n', size, '\n', minimum)
-    # grid_red = add_red_tiles(red_coordinates, size, minimum)
-    # grid = add_green_tiles(coordinates, size)
-    # print(grid_red)
+    grid_red = add_red_tiles(red_coordinates, size, minimum)
+
+    print(grid_red)
+    # display_grid(grid_red, size, minimum)
     green_coords = get_green_coordinates(red_coordinates)
     # print(len(green_coords))
-    grid_green = add_green_tiles(green_coords, size, minimum)
-    green_coords = fill_green_coords(grid_green, green_coords, size, minimum)
-    grid_green = add_green_tiles(green_coords, size, minimum)
+    # grid_green = add_green_tiles(green_coords, size, minimum)
+    # green_coords = fill_green_coords(grid_green, green_coords, size, minimum)
+    # grid_green = add_green_tiles(green_coords, size, minimum)
     # print(len(green_coords))
     # display_grid(grid_green, size, minimum)
     red_green_coord = green_coords + red_coordinates
-    red_green_coord = list(set(red_green_coord))
-    grid_complete = grid_red_green(green_coords, red_coordinates, size, minimum)
-    display_grid(grid_complete, size, minimum)
-    max_area = get_max_area(red_coordinates, red_green_coord)
-    print(max_area)
+    red_green_coord.sort(key=lambda x: x[0])
+    red_green_coord.sort(key=lambda x: x[1])
+    print(red_green_coord)
+    all_coords = fill_coords(red_green_coord)
+    border_grid = grid_border(red_green_coord, size, minimum)
+    # red_green_coord = list(set(red_green_coord))
+    # grid_complete = grid_red_green(green_coords, red_coordinates, size, minimum)
+    display_grid(border_grid, size, minimum)
+    print(all_coords)
+    # max_area = get_max_area(red_coordinates, red_green_coord)
+    # print(max_area)
 
 
 if __name__ == '__main__':
